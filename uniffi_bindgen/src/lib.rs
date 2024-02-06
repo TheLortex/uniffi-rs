@@ -377,9 +377,7 @@ pub fn guess_crate_root(udl_file: &Utf8Path) -> Result<&Utf8Path> {
         .context("UDL file has no parent folder!")?
         .parent()
         .context("UDL file has no grand-parent folder!")?;
-    if !path_guess.join("Cargo.toml").is_file() {
-        bail!("UDL file does not appear to be inside a crate")
-    }
+
     Ok(path_guess)
 }
 
