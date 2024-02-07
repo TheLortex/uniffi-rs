@@ -241,7 +241,7 @@ pub fn generate_external_bindings<T: BindingGenerator>(
     let config_file_override = config_file_override.as_ref().map(|p| p.as_ref());
 
     let config = {
-        let mut config = load_initial_config::<T::Config>(crate_root, config_file_override)?;
+        let mut config = load_initial_config::<T::Config>(config_file_override)?;
         config.update_from_ci(&component);
         if let Some(ref library_file) = library_file {
             if let Some(cdylib_name) = crate::library_mode::calc_cdylib_name(library_file.as_ref())
@@ -434,12 +434,9 @@ fn load_toml_file(source: Option<&Utf8Path>) -> Result<Option<toml::value::Table
 
 /// Load the default `uniffi.toml` config, merge TOML trees with `config_file_override` if specified.
 fn load_initial_config<Config: DeserializeOwned>(
-    crate_root: &Utf8Path,
     config_file_override: Option<&Utf8Path>,
 ) -> Result<Config> {
-    let mut config = load_toml_file(Some(crate_root.join("uniffi.toml").as_path()))
-        .context("default config")?
-        .unwrap_or(toml::value::Table::default());
+    let mut config = toml::value::Table::default();
 
     let override_config = load_toml_file(config_file_override).context("override config")?;
     if let Some(override_config) = override_config {
