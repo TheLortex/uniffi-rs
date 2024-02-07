@@ -134,10 +134,7 @@ impl GeneratedSources {
             out_dir,
             false,
         )?;
-        let main_source = sources
-            .iter()
-            .find(|s| s.package.name == crate_name)
-            .unwrap();
+        let main_source = todo!("removed the thing");
         let main_module = main_source.config.bindings.swift.module_name();
         let modulemap_glob = glob(&out_dir.join("*.modulemap"))?;
         let module_map = match modulemap_glob.len() {
