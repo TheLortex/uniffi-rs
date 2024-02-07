@@ -51,20 +51,35 @@ pub fn generate_bindings<T: BindingGenerator + ?Sized>(
     )
 }
 
+fn fake_metadata(crate_name: &str) -> cargo_metadata::Metadata {
+    cargo_metadata::MetadataCommand::parse(format!(
+        "{{
+        \"packages\": [{{
+            \"name\": \"{crate_name}\",
+            \"version\": \"0.0.0\",
+            \"id\": \"\",
+            \"manifest_path\": \"\",
+            \"dependencies\": [],
+            \"targets\": [],
+            \"features\": {{}}
+        }}],
+        \"workspace_members\": [],
+        \"target_directory\": \"\",
+        \"version\": 1,
+        \"workspace_root\": \"\"
+    }}",
+    ))
+    .expect("is valid")
+}
+
 #[cfg(test)]
 mod test2 {
+    use super::fake_metadata;
+
     #[test]
     fn test() {
-        cargo_metadata::MetadataCommand::parse(
-            "{
-            \"packages\": [],
-            \"workspace_members\": [],
-            \"target_directory\": \"\",
-            \"version\": 1,
-            \"workspace_root\": \"\"
-        }",
-        )
-        .expect("valid metadata");
+        let crate_name_tkt = "salut";
+        fake_metadata(crate_name_tkt);
     }
 }
 
@@ -79,16 +94,8 @@ pub fn generate_external_bindings<T: BindingGenerator>(
     out_dir: &Utf8Path,
     try_format_code: bool,
 ) -> Result<Vec<Source<T::Config>>> {
-    let cargo_metadata = cargo_metadata::MetadataCommand::parse(
-        "{
-        \"packages\": [],
-        \"workspace_members\": [],
-        \"target_directory\": \"\",
-        \"version\": 1,
-        \"workspace_root\": \"\"
-    }",
-    )
-    .expect("valid metadata");
+    let crate_name_tkt = crate_name.clone().expect("i need a name");
+    let cargo_metadata = fake_metadata(&crate_name_tkt);
 
     let cdylib_name = calc_cdylib_name(library_path);
     binding_generator.check_library_path(library_path, cdylib_name)?;
