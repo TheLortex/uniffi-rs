@@ -51,6 +51,23 @@ pub fn generate_bindings<T: BindingGenerator + ?Sized>(
     )
 }
 
+#[cfg(test)]
+mod test2 {
+    #[test]
+    fn test() {
+        cargo_metadata::MetadataCommand::parse(
+            "{
+            \"packages\": [],
+            \"workspace_members\": [],
+            \"target_directory\": \"\",
+            \"version\": 1,
+            \"workspace_root\": \"\"
+        }",
+        )
+        .expect("valid metadata");
+    }
+}
+
 /// Generate foreign bindings
 ///
 /// Returns the list of sources used to generate the bindings, in no particular order.
@@ -64,11 +81,11 @@ pub fn generate_external_bindings<T: BindingGenerator>(
 ) -> Result<Vec<Source<T::Config>>> {
     let cargo_metadata = cargo_metadata::MetadataCommand::parse(
         "{
-        packages: [],
-        workspace_members: [],
-        target_directory: \"\",
-        version: 1,
-        workspace_root: \"\"
+        \"packages\": [],
+        \"workspace_members\": [],
+        \"target_directory\": \"\",
+        \"version\": 1,
+        \"workspace_root\": \"\"
     }",
     )
     .expect("valid metadata");
