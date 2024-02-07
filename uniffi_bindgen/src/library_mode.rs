@@ -62,9 +62,17 @@ pub fn generate_external_bindings<T: BindingGenerator>(
     out_dir: &Utf8Path,
     try_format_code: bool,
 ) -> Result<Vec<Source<T::Config>>> {
-    let cargo_metadata = MetadataCommand::new()
-        .exec()
-        .context("error running cargo metadata")?;
+    let cargo_metadata = cargo_metadata::MetadataCommand::parse(
+        "{
+        packages: [],
+        workspace_members: [],
+        target_directory: \"\",
+        version: 1,
+        workspace_root: \"\"
+    }",
+    )
+    .expect("valid metadata");
+
     let cdylib_name = calc_cdylib_name(library_path);
     binding_generator.check_library_path(library_path, cdylib_name)?;
 
