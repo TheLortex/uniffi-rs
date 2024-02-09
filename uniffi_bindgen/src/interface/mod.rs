@@ -940,6 +940,7 @@ struct RecursiveTypeIterator<'a> {
 impl<'a> RecursiveTypeIterator<'a> {
     /// Allocate a new `RecursiveTypeIterator` over the given item.
     fn new(ci: &'a ComponentInterface, item: &'a Type) -> RecursiveTypeIterator<'a> {
+        println!("new RecursiveTypeIterator: {:?}", item);
         RecursiveTypeIterator {
             ci,
             // We begin by iterating over the types from the item itself.
@@ -951,6 +952,7 @@ impl<'a> RecursiveTypeIterator<'a> {
 
     /// Add a new type to the queue of pending types, if not previously seen.
     fn add_pending_type(&mut self, type_: &'a Type) {
+        println!("add_pending_type: {:?}", type_);
         match type_ {
             Type::Record { name, .. }
             | Type::Enum { name, .. }
@@ -1202,21 +1204,25 @@ new definition: Enum {
     fn test_correct_recursion_when_walking_types() {
         const UDL: &str = r#"
             namespace test{};
-            interface TestObj {
-                void tester(TestRecord foo);
+            interface CursorId {
+                u64 at();
             };
-            dictionary TestRecord {
-                NestedRecord bar;
+            dictionary Message {
+                CursorId bar;
             };
-            dictionary NestedRecord {
-                u64 baz;
+            dictionary Output {
+                sequence<Message> baz;
+            };
+            [Enum]
+            interface Bidule {
+                Ok(Output value);
+                Err(string err);
             };
         "#;
         let ci = ComponentInterface::from_webidl(UDL, "crate_name").unwrap();
-        assert!(ci.item_contains_unsigned_types(&Type::Object {
-            name: "TestObj".into(),
+        assert!(ci.item_contains_object_references(&Type::Enum {
+            name: "Bidule".into(),
             module_path: "".into(),
-            imp: ObjectImpl::Struct,
         }));
     }
 
