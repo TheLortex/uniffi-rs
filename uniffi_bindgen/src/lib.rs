@@ -195,11 +195,6 @@ impl BindingGenerator for BindingGeneratorDefault {
     }
 
     fn check_library_path(&self, library_path: &Utf8Path, cdylib_name: Option<&str>) -> Result<()> {
-        for &language in &self.target_languages {
-            if cdylib_name.is_none() && language != TargetLanguage::Swift {
-                bail!("Generate bindings for {language} requires a cdylib, but {library_path} was given");
-            }
-        }
         Ok(())
     }
 }
