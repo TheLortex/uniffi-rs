@@ -66,13 +66,7 @@ pub fn generate_external_bindings<T: BindingGenerator>(
     let cdylib_name = calc_cdylib_name(library_paths[0]);
     binding_generator.check_library_path(library_paths[0], cdylib_name)?;
 
-    let mut sources = library_paths
-        .into_iter()
-        .map(|library_path| find_sources(library_path, cdylib_name, config_file_override))
-        .collect::<Result<Vec<Vec<_>>, _>>()?
-        .into_iter()
-        .flatten()
-        .collect::<Vec<_>>();
+    let mut sources = find_sources(library_paths, cdylib_name, config_file_override)?;
 
     fs::create_dir_all(out_dir)?;
     if let Some(crate_name) = &crate_name {
@@ -119,11 +113,19 @@ pub fn calc_cdylib_name(library_path: &Utf8Path) -> Option<&str> {
 }
 
 fn find_sources<Config: BindingsConfig>(
-    library_path: &Utf8Path,
+    library_paths: &[&Utf8Path],
     cdylib_name: Option<&str>,
     config_file_override: Option<&Utf8Path>,
 ) -> Result<Vec<Source<Config>>> {
-    let items = macro_metadata::extract_from_library(library_path)?;
+    let items = library_paths
+        .into_iter()
+        .copied()
+        .map(macro_metadata::extract_from_library)
+        .collect::<Result<Vec<_>, _>>()?
+        .into_iter()
+        .flatten()
+        .collect::<Vec<_>>();
+
     let mut metadata_groups = create_metadata_groups(&items);
     group_metadata(&mut metadata_groups, items)?;
 
